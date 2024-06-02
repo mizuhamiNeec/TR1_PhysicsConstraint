@@ -116,6 +116,11 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="C:\KamataEngine\DirectXGame\2d\ImGuiManager.cpp" />
     <ClCompile Include="C:\KamataEngine\Adapter\Novice.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\Mat4.cpp" />
+    <ClCompile Include="Math\Transform.cpp" />
+    <ClCompile Include="Math\Vec2\Vec2.cpp" />
+    <ClCompile Include="Math\Vec3\Vec3.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\base\StringUtility.h" />
@@ -145,6 +150,16 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="C:\KamataEngine\DirectXGame\input\Input.h" />
     <ClInclude Include="C:\KamataEngine\DirectXGame\scene\GameScene.h" />
     <ClInclude Include="C:\KamataEngine\Adapter\Novice.h" />
+    <ClInclude Include="Math\Mat4.h" />
+    <ClInclude Include="Math\Transform.h" />
+    <ClInclude Include="Math\Utils.h" />
+    <ClInclude Include="Math\Vec2\Vec2.h" />
+    <ClInclude Include="Math\Vec3\Vec3.h" />
+    <ClInclude Include="Object\Object.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Physics\CollisionShape\" />
+    <Folder Include="Physics\RigidBody\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
