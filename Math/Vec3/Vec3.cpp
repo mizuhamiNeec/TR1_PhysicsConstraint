@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 const Vec3 Vec3::zero(0.0f, 0.0f, 0.0f);
+const Vec3 Vec3::one(1.0f, 1.0f, 1.0f);
 
 /// <summary>
 ///	ベクトルの長さの2乗を返します
@@ -35,7 +36,7 @@ float Vec3::DotProduct(const Vec3& other) const {
 /// otherとのCross積を返します
 /// </summary>
 Vec3 Vec3::CrossProduct(const Vec3& other) const {
-	return {y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x};
+	return { y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x };
 }
 
 /// <summary>
@@ -52,7 +53,7 @@ Vec3 Vec3::Normalized() const {
 	const float sqrtLength = SqrtLength();
 	if (sqrtLength > 0.0f) {
 		const float invertLength = 1.0f / sqrtf(sqrtLength);
-		return {x * invertLength, y * invertLength, z * invertLength};
+		return { x * invertLength, y * invertLength, z * invertLength };
 	}
 	return zero;
 }
@@ -112,7 +113,7 @@ const float& Vec3::operator[](const int index) const {
 /// </summary>
 /// <param name="rhs">加算するスカラー値</param>
 Vec3 Vec3::operator+(const float& rhs) const {
-	return {x + rhs, y + rhs, z + rhs};
+	return { x + rhs, y + rhs, z + rhs };
 }
 
 /// <summary>
@@ -120,7 +121,7 @@ Vec3 Vec3::operator+(const float& rhs) const {
 /// </summary>
 /// <param name="rhs">減算するスカラー値</param>
 Vec3 Vec3::operator-(const float& rhs) const {
-	return {x - rhs, y - rhs, z - rhs};
+	return { x - rhs, y - rhs, z - rhs };
 }
 
 /// <summary>
@@ -128,7 +129,7 @@ Vec3 Vec3::operator-(const float& rhs) const {
 /// </summary>
 /// <param name="rhs">乗算するスカラー値</param>
 Vec3 Vec3::operator*(const float& rhs) const {
-	return {x * rhs, y * rhs, z * rhs};
+	return { x * rhs, y * rhs, z * rhs };
 }
 
 /// <summary>
@@ -136,7 +137,7 @@ Vec3 Vec3::operator*(const float& rhs) const {
 /// </summary>
 /// <param name="rhs">除算するスカラー値</param>
 Vec3 Vec3::operator/(const float& rhs) const {
-	return {x / rhs, y / rhs, z / rhs};
+	return { x / rhs, y / rhs, z / rhs };
 }
 
 /// <summary>
@@ -188,7 +189,7 @@ Vec3& Vec3::operator/=(const float& rhs) {
 /// </summary>
 /// <param name="rhs">加算するVec3</param>
 Vec3 Vec3::operator+(const Vec3& rhs) const {
-	return {x + rhs.x, y + rhs.y, z + rhs.z};
+	return { x + rhs.x, y + rhs.y, z + rhs.z };
 }
 
 /// <summary>
@@ -196,7 +197,7 @@ Vec3 Vec3::operator+(const Vec3& rhs) const {
 /// </summary>
 /// <param name="rhs">減算するVec3</param>
 Vec3 Vec3::operator-(const Vec3& rhs) const {
-	return {x - rhs.x, y - rhs.y, z - rhs.z};
+	return { x - rhs.x, y - rhs.y, z - rhs.z };
 }
 
 /// <summary>
@@ -204,7 +205,7 @@ Vec3 Vec3::operator-(const Vec3& rhs) const {
 /// </summary>
 /// <param name="rhs">乗算するVec3</param>
 Vec3 Vec3::operator*(const Vec3& rhs) const {
-	return {x * rhs.x, y * rhs.y, z * rhs.z};
+	return { x * rhs.x, y * rhs.y, z * rhs.z };
 }
 
 /// <summary>
@@ -212,7 +213,7 @@ Vec3 Vec3::operator*(const Vec3& rhs) const {
 /// </summary>
 /// <param name="rhs">除算するVec3</param>
 Vec3 Vec3::operator/(const Vec3& rhs) const {
-	return {x / rhs.x, y / rhs.y, z / rhs.z};
+	return { x / rhs.x, y / rhs.y, z / rhs.z };
 }
 
 /// <summary>

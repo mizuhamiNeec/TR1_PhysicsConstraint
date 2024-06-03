@@ -3,11 +3,12 @@
 struct Vec3 final {
 	float x, y, z;
 
-	Vec3(): x(0.0f), y(0.0f), z(0.0f) {}
+	Vec3() : x(0.0f), y(0.0f), z(0.0f) {}
 
-	Vec3(const float x, const float y, const float z): x(x), y(y), z(z) {}
+	Vec3(const float x, const float y, const float z) : x(x), y(y), z(z) {}
 
 	static const Vec3 zero;
+	static const Vec3 one;
 
 	/* -------- メンバ関数 -------- */
 

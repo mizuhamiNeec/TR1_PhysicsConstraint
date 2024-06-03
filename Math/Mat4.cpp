@@ -267,10 +267,17 @@ Mat4 Mat4::Affine(const Vec3& scale, const Vec3& rotate, const Vec3& translate) 
 	return s * rx * ry * rz * t;
 }
 
-Mat4 Mat4::PerspectiveFovMat(const float fovY, const float aspectRatio, const float nearClip, const float farClip) {
+Mat4 Mat4::PerspectiveFovMat(const float fov, const float aspectRatio, const float nearClip, const float farClip, ProjectionMode projectionMode) {
 	Mat4 result = Identity();
 
-	const float cot = 1.0f / std::tan(fovY * 0.5f);
+	switch(projectionMode) {
+	case ProjectionMode::Perspective:
+		break;
+	case ProjectionMode::Orthographic:
+		break;
+	}
+
+	const float cot = 1.0f / std::tan(fov * 0.5f);
 	const float dist = farClip - nearClip;
 
 	result.m[0][0] = cot / aspectRatio;
@@ -278,7 +285,6 @@ Mat4 Mat4::PerspectiveFovMat(const float fovY, const float aspectRatio, const fl
 	result.m[2][2] = (farClip + nearClip) / dist;
 	result.m[2][3] = 1.0f;
 	result.m[3][2] = (-nearClip * farClip) / dist;
-	result.m[3][3] = 0.0f;
 
 	return result;
 }
