@@ -1,29 +1,20 @@
 #pragma once
-#include "Math/Mat4.h"
-#include "Object/Object.h"
+#include "Object/Base/Object.h"
 
-enum class FovAxis {
-	Horizontal,
-	Vertical
+enum class ProjectionMode {
+	Perspective,
+	Orthographic
 };
 
 class Camera : public Object {
 public:
-	Mat4 getViewMatrix() const;
-	void SetViewMatrix(const Mat4& viewMatrix);
+	Camera(std::string name = "Camera", std::string tag = "", bool active = true);
+	Vec3 WorldToScreen(Vec3 world) const;
 
-	Mat4 GetProjectionMatrix() const;
-	void SetProjectionMatrix(const Mat4& projectionMatrix);
+	void Details() override;
 
-	Camera(std::string name = "Camera", std::string tag = "", bool active = true, ProjectionMode projectionMode = ProjectionMode::Perspective, FovAxis fovAxis = FovAxis::Vertical, float fov = 90.0f);
-	void Update() override;
+	float GetZoom() const;
 
 private:
-	Mat4 viewMatrix_;
-	Mat4 projectionMatrix_;
-
-	ProjectionMode projection_;
-	FovAxis fovAxis_;
-	float fov_;
+	float zoom_ = 1.0f;
 };
-

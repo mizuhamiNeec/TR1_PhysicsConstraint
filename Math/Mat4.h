@@ -2,9 +2,9 @@
 
 #include "Vec3/Vec3.h"
 
-enum class ProjectionMode {
-	Perspective,
-	Orthographic
+enum class FovAxis {
+	Horizontal,
+	Vertical
 };
 
 struct Mat4 final {
@@ -29,9 +29,10 @@ struct Mat4 final {
 
 	static Mat4 Affine(const Vec3& scale, const Vec3& rotate, const Vec3& translate);
 
-	static Mat4 PerspectiveFovMat(const float fov, const float aspectRatio, const float nearClip, const float farClip, ProjectionMode projectionMode);
-	static Mat4 MakeOrthographicMat(float left, float top, float right, float bottom,
-		float nearClip, float farClip);
+	static Mat4 PerspectiveFovMat(const float fov, const float aspectRatio, const float nearClip, const float farClip,
+	                              FovAxis fovAxis);
+	static Mat4 OrthographicMat(float left, float top, float right, float bottom,
+	                            float nearClip, float farClip);
 	static Mat4 ViewportMat(float left, float top, float width, float height,
-		float minDepth, float maxDepth);
+	                        float minDepth, float maxDepth);
 };

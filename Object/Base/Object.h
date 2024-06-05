@@ -3,16 +3,19 @@
 #include <memory>
 #include <string>
 #include <vector>
-
 #include "Math/Transform.h"
+
+class Camera;
 
 class Object : public std::enable_shared_from_this<Object> {
 public:
+	virtual ~Object() = default;
 	Object(std::string name = "Object", std::string tag = "", bool active = true);
 
 	virtual void Initialize(const std::string& name);
 	virtual void Update();
-	virtual void Draw();
+	virtual void Draw(const Camera& camera);
+	virtual void Details();
 
 	std::vector<std::shared_ptr<Object>> GetChildren();
 	Transform GetTransform() const;
@@ -20,7 +23,6 @@ public:
 	std::string GetName();
 
 	void SetParent(const std::shared_ptr<Object>& parentObject);
-
 
 	void AddChild(const std::shared_ptr<Object>& child) {
 		child->SetParent(shared_from_this());
@@ -39,4 +41,6 @@ protected:
 	bool active_;
 	std::shared_ptr<Object> parent_;
 	std::vector<std::shared_ptr<Object>> children_;
+
+	bool maintainAspectRatio = false;
 };

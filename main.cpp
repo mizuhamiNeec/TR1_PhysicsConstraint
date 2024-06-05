@@ -3,12 +3,40 @@
 #include <imgui.h>
 #include <Novice.h>
 
-#include "Camera.h"
-#include "config.h"
+#include "Config.h"
 #include "Math/Vec3/Vec3.h"
-#include "Object/Object.h"
+#include "Object/Base/Object.h"
+#include "Camera.h"
+#include "Object/Circle.h"
 
 constexpr char kWindowTitle[] = "LE2B_24_ミズサワ_ハミル_TR1_PhysicsConstraint";
+
+void RenderOutliner(const std::shared_ptr<Object>& object, std::shared_ptr<Object>& selectedObject) {
+	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+	if (object->GetChildren().empty()) {
+		nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	if (object == selectedObject) {
+		nodeFlags |= ImGuiTreeNodeFlags_Selected;
+	}
+
+	bool nodeOpen = ImGui::TreeNodeEx(object->GetName().c_str(), nodeFlags);
+
+	if (ImGui::IsItemClicked()) {
+		selectedObject = object;
+	}
+
+	if (nodeOpen && !object->GetChildren().empty()) {
+		for (const auto& child : object->GetChildren()) {
+			RenderOutliner(child, selectedObject);
+		}
+		ImGui::TreePop();
+	} else if (nodeOpen) {
+		ImGui::TreePop();
+	}
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -16,29 +44,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Novice::Initialize(kWindowTitle, kClientWidth, kClientHeight);
 
 	// キー入力結果を受け取る箱
-	char keys[256] = { 0 };
-	char preKeys[256] = { 0 };
+	char keys[256] = {0};
+	char preKeys[256] = {0};
 
-	bool isShowBoundingBox = false;
-
+	// ワールドにあるすべてのオブジェクトを格納します
 	std::vector<std::shared_ptr<Object>> objects;
 
-	auto object = std::make_shared<Object>("object");
-	object->Initialize("Object");
-	auto object2 = std::make_shared<Object>("object2");
-	object2->Initialize("Object2");
-	object->AddChild(object2);
-	objects.push_back(object);
+	auto circle = std::make_shared<Circle>("Circle");
+	objects.push_back(circle);
 
-	auto camera = std::make_shared<Camera>("Camera");
+	// // オブジェクトを複数作成し、子オブジェクトも追加
+	// for (int i = 0; i < 5; ++i) {
+	// 	auto parent = std::make_shared<Object>("Parent" + std::to_string(i + 1));
+	// 	for (int j = 0; j < rand() % 6; ++j) {
+	// 		auto child = std::make_shared<Object>("Child" + std::to_string(i + 1) + "-" + std::to_string(j + 1));
+	// 		parent->AddChild(child);
+	// 	}
+	// 	objects.push_back(parent);
+	// }
+
+	// カメラを作成
+	auto camera = std::make_shared<Camera>();
 	camera->Initialize("Camera");
 	camera->SetTransform(
-		{ {0.0f,0.0f,0.0f},
-		{0.0f,0.01f,0.0f},
-		{1.0f,1.0f,1.0f} }
+		{
+			{0.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f},
+			{1.0f, 1.0f, 1.0f}
+		}
 	);
-
 	objects.push_back(camera);
+
+	// 選択されたオブジェクトのポインタがここに格納される
+	std::shared_ptr<Object> selectedObject = nullptr;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -53,11 +91,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
+		// オブジェクトの更新
 		for (auto o : objects) {
 			o->Update();
 		}
-
-		camera->Update();
 
 		///
 		/// ↑更新処理ここまで
@@ -67,33 +104,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		Vec3 pos = Mat4::Transform(Mat4::Transform(object->GetTransform().position, camera->GetProjectionMatrix()), camera->getViewMatrix());
-
-		Novice::DrawEllipse(
-			static_cast<int>(pos.x), static_cast<int>(pos.y),
-			8, 8,
-			0.0f,
-			RED,
-			kFillModeSolid
-		);
-
 		ImGui::ShowDemoWindow();
+
+		for (const auto& o : objects) {
+			o->Draw(*camera);
+		}
 
 		ImGui::Begin("Outliner");
 
-		for (auto o : objects) {
-			if (ImGui::TreeNode(std::format("{}", o->GetName()).c_str())) {
-
-				for (auto& child : o->GetChildren()) {
-
-					if (ImGui::TreeNode(std::format("{}", child->GetName()).c_str())) {
-
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::TreePop();
-			}
+		for (const auto& o : objects) {
+			RenderOutliner(o, selectedObject);
 		}
 
 		ImGui::End();
@@ -102,29 +122,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		if (ImGui::BeginTabBar("Object")) {
 			if (ImGui::BeginTabItem("Object")) {
-				if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-					Transform tmp = object->GetTransform();
-
-					ImGui::DragFloat3("Location", &tmp.position.x, 0.01f);
-					ImGui::DragFloat3("Rotation", &tmp.rotation.x, 0.01f);
-					ImGui::DragFloat3("Scale", &tmp.scale.x, 0.01f);
-					object->SetTransform(tmp);
+				if (selectedObject != nullptr) {
+					selectedObject->Details();
 				}
-
-				if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen)) {
-					ImGui::Checkbox("Show bounding box", &isShowBoundingBox);
-				}
-
-				ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("Camera")) {
-				Transform tmp = camera->GetTransform();
-
-				ImGui::DragFloat3("Location", &tmp.position.x, 0.01f);
-				ImGui::DragFloat3("Rotation", &tmp.rotation.x, 0.01f);
-				ImGui::DragFloat3("Scale", &tmp.scale.x, 0.01f);
-				camera->SetTransform(tmp);
 
 				ImGui::EndTabItem();
 			}

@@ -4,15 +4,14 @@
 #include <cmath>
 #include <format>
 
+#include "Camera.h"
+
 Mat4 Mat4::operator+(const Mat4& rhs) const {
-	return {
-		{
-			{m[0][0] + rhs.m[0][0], m[0][1] + rhs.m[0][1], m[0][2] + rhs.m[0][2], m[0][3] + rhs.m[0][3]},
-			{m[1][0] + rhs.m[1][0], m[1][1] + rhs.m[1][1], m[1][2] + rhs.m[1][2], m[1][3] + rhs.m[1][3]},
-			{m[2][0] + rhs.m[2][0], m[2][1] + rhs.m[2][1], m[2][2] + rhs.m[2][2], m[2][3] + rhs.m[2][3]},
-			{m[3][0] + rhs.m[3][0], m[3][1] + rhs.m[3][1], m[3][2] + rhs.m[3][2], m[3][3] + rhs.m[3][3]},
-		}
-	};
+	Mat4 result;
+	for (int i = 0; i < 4; ++i)
+		for (int j = 0; j < 4; ++j)
+			result.m[i][j] = m[i][j] + rhs.m[i][j];
+	return result;
 }
 
 Mat4 Mat4::operator-(const Mat4& rhs) const {
@@ -59,22 +58,22 @@ Mat4 Mat4::operator*(const Mat4& rhs) const {
 
 Mat4 Mat4::Inverse() const {
 	const float a =
-		m[0][0] * m[1][1] * m[2][2] * m[3][3] + m[0][0] * m[1][2] * m[2][3] * m[3][1] + m[0][0] * m[1][3] * m[2][1]
-		* m[3][2] -
-		m[0][0] * m[1][3] * m[2][2] * m[3][1] - m[0][0] * m[1][2] * m[2][1] * m[3][3] - m[0][0] * m[1][1] * m[2][3]
-		* m[3][2] -
-		m[0][1] * m[1][0] * m[2][2] * m[3][3] - m[0][2] * m[1][0] * m[2][3] * m[3][1] - m[0][3] * m[1][0] * m[2][1]
-		* m[3][2] +
-		m[0][3] * m[1][0] * m[2][2] * m[3][1] + m[0][2] * m[1][0] * m[2][1] * m[3][3] + m[0][1] * m[1][0] * m[2][3]
-		* m[3][2] +
-		m[0][1] * m[1][2] * m[2][0] * m[3][3] + m[0][2] * m[1][3] * m[2][0] * m[3][1] + m[0][3] * m[1][1] * m[2][0]
-		* m[3][2] -
-		m[0][3] * m[1][2] * m[2][0] * m[3][1] - m[0][2] * m[1][1] * m[2][0] * m[3][3] - m[0][1] * m[1][3] * m[2][0]
-		* m[3][2] -
-		m[0][1] * m[1][2] * m[2][3] * m[3][0] - m[0][2] * m[1][3] * m[2][1] * m[3][0] - m[0][3] * m[1][1] * m[2][2]
-		* m[3][0] +
-		m[0][3] * m[1][2] * m[2][1] * m[3][0] + m[0][2] * m[1][1] * m[2][3] * m[3][0] + m[0][1] * m[1][3] * m[2][2]
-		* m[3][0];
+			m[0][0] * m[1][1] * m[2][2] * m[3][3] + m[0][0] * m[1][2] * m[2][3] * m[3][1] + m[0][0] * m[1][3] * m[2][1]
+			* m[3][2] -
+			m[0][0] * m[1][3] * m[2][2] * m[3][1] - m[0][0] * m[1][2] * m[2][1] * m[3][3] - m[0][0] * m[1][1] * m[2][3]
+			* m[3][2] -
+			m[0][1] * m[1][0] * m[2][2] * m[3][3] - m[0][2] * m[1][0] * m[2][3] * m[3][1] - m[0][3] * m[1][0] * m[2][1]
+			* m[3][2] +
+			m[0][3] * m[1][0] * m[2][2] * m[3][1] + m[0][2] * m[1][0] * m[2][1] * m[3][3] + m[0][1] * m[1][0] * m[2][3]
+			* m[3][2] +
+			m[0][1] * m[1][2] * m[2][0] * m[3][3] + m[0][2] * m[1][3] * m[2][0] * m[3][1] + m[0][3] * m[1][1] * m[2][0]
+			* m[3][2] -
+			m[0][3] * m[1][2] * m[2][0] * m[3][1] - m[0][2] * m[1][1] * m[2][0] * m[3][3] - m[0][1] * m[1][3] * m[2][0]
+			* m[3][2] -
+			m[0][1] * m[1][2] * m[2][3] * m[3][0] - m[0][2] * m[1][3] * m[2][1] * m[3][0] - m[0][3] * m[1][1] * m[2][2]
+			* m[3][0] +
+			m[0][3] * m[1][2] * m[2][1] * m[3][0] + m[0][2] * m[1][1] * m[2][3] * m[3][0] + m[0][1] * m[1][3] * m[2][2]
+			* m[3][0];
 
 	const Mat4 result = {
 		{
@@ -204,9 +203,12 @@ Mat4 Mat4::Scale(const Vec3& scale) {
 
 Vec3 Mat4::Transform(const Vec3& vector, const Mat4& matrix) {
 	Vec3 result; // w=1がデカルト座標系であるので(x,y,z,1)のベクトルとしてmatrixとの積をとる
-	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][0];
-	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
-	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
+	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][
+		0];
+	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][
+		1];
+	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][
+		2];
 	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
 	assert(w != 0.0f); // ベクトルに対して基本的な操作を行う行列でwが0になることはありえない
 	result.x /= w; // w=1がデカルト座標系であるので、w除算することで同時座標をデカルト座標に戻す
@@ -267,21 +269,27 @@ Mat4 Mat4::Affine(const Vec3& scale, const Vec3& rotate, const Vec3& translate) 
 	return s * rx * ry * rz * t;
 }
 
-Mat4 Mat4::PerspectiveFovMat(const float fov, const float aspectRatio, const float nearClip, const float farClip, ProjectionMode projectionMode) {
+Mat4 Mat4::PerspectiveFovMat(const float fov, const float aspectRatio, const float nearClip, const float farClip,
+                             FovAxis fovAxis) {
 	Mat4 result = Identity();
 
-	switch(projectionMode) {
-	case ProjectionMode::Perspective:
-		break;
-	case ProjectionMode::Orthographic:
-		break;
+	float cot;
+
+	switch (fovAxis) {
+		case FovAxis::Horizontal:
+			cot = 1.0f / std::tan(fov * 0.5f);
+			result.m[0][0] = cot / aspectRatio;
+			result.m[1][1] = cot;
+			break;
+		case FovAxis::Vertical:
+			cot = 1.0f / std::tan(fov * 0.5f);
+			result.m[0][0] = cot;
+			result.m[1][1] = cot * aspectRatio;
+			break;
 	}
 
-	const float cot = 1.0f / std::tan(fov * 0.5f);
 	const float dist = farClip - nearClip;
 
-	result.m[0][0] = cot / aspectRatio;
-	result.m[1][1] = cot;
 	result.m[2][2] = (farClip + nearClip) / dist;
 	result.m[2][3] = 1.0f;
 	result.m[3][2] = (-nearClip * farClip) / dist;
@@ -289,8 +297,8 @@ Mat4 Mat4::PerspectiveFovMat(const float fov, const float aspectRatio, const flo
 	return result;
 }
 
-Mat4 Mat4::MakeOrthographicMat(const float left, const float top, const float right, const float bottom,
-	const float nearClip, const float farClip) {
+Mat4 Mat4::OrthographicMat(const float left, const float top, const float right, const float bottom,
+                           const float nearClip, const float farClip) {
 	Mat4 result = Identity();
 
 	result.m[0][0] = 2.0f / (right - left);
@@ -304,7 +312,7 @@ Mat4 Mat4::MakeOrthographicMat(const float left, const float top, const float ri
 }
 
 Mat4 Mat4::ViewportMat(const float left, const float top, const float width, const float height, const float minDepth,
-	const float maxDepth) {
+                       const float maxDepth) {
 	Mat4 result = Identity();
 
 	result.m[0][0] = width / 2.0f;
