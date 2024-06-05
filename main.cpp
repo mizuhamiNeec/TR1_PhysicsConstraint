@@ -44,24 +44,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Novice::Initialize(kWindowTitle, kClientWidth, kClientHeight);
 
 	// キー入力結果を受け取る箱
-	char keys[256] = {0};
-	char preKeys[256] = {0};
+	char keys[256] = { 0 };
+	char preKeys[256] = { 0 };
 
 	// ワールドにあるすべてのオブジェクトを格納します
 	std::vector<std::shared_ptr<Object>> objects;
+	std::vector<std::shared_ptr<Circle>> circles;
 
-	auto circle = std::make_shared<Circle>("Circle");
-	objects.push_back(circle);
+	// オブジェクトを複数作成し、子オブジェクトも追加
+	int parentCounter = 1;
+	//int childCounter = 1;
+	int x = 24; // 親オブジェクトの数
+	int y = 24; // 子オブジェクトの数
 
-	// // オブジェクトを複数作成し、子オブジェクトも追加
-	// for (int i = 0; i < 5; ++i) {
-	// 	auto parent = std::make_shared<Object>("Parent" + std::to_string(i + 1));
-	// 	for (int j = 0; j < rand() % 6; ++j) {
-	// 		auto child = std::make_shared<Object>("Child" + std::to_string(i + 1) + "-" + std::to_string(j + 1));
-	// 		parent->AddChild(child);
-	// 	}
-	// 	objects.push_back(parent);
-	// }
+	for (int i = 0; i < x; ++i) {
+		for (int j = 0; j < y; ++j) {
+			auto parentCircle = std::make_shared<Circle>("ParentCircle" + std::to_string(parentCounter++));
+			parentCircle->SetTransform({ {i * parentCircle->GetRadius() * 2.0f, j * parentCircle->GetRadius() * 2.0f, 0.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f} });
+			circles.push_back(parentCircle);
+			objects.push_back(parentCircle);
+
+
+			/*auto childCircle = std::make_shared<Circle>("ChildCircle" + std::to_string(childCounter++));
+			childCircle->SetTransform({ {i * parentCircle->GetRadius() * 5.0f, (j + 1) * childCircle->GetRadius() * 2.25f, 0.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f} });
+			parentCircle->AddChild(childCircle);*/
+		}
+	}
 
 	// カメラを作成
 	auto camera = std::make_shared<Camera>();
@@ -73,6 +81,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			{1.0f, 1.0f, 1.0f}
 		}
 	);
+
 	objects.push_back(camera);
 
 	// 選択されたオブジェクトのポインタがここに格納される
@@ -91,10 +100,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
+		// 円の更新
+		for (size_t i = 0; i < circles.size(); ++i) {
+			for (size_t j = i + 1; j < circles.size(); ++j) {
+				if (circles[i]->IsCollide(*circles[j])) {
+					circles[i]->ResolveCollision(*circles[j]);
+				}
+			}
+		}
+
 		// オブジェクトの更新
-		for (auto o : objects) {
+		for (auto& o : objects) {
 			o->Update();
 		}
+
+		Transform newCameraTransform = {
+			Vec3::Lerp(camera->GetTransform().position, selectedObject != nullptr ? selectedObject->GetTransform().position : Vec3::zero, 10.0f * deltaTime),
+			Vec3::zero,
+			Vec3::one
+		};
+
+		camera->SetTransform(newCameraTransform);
 
 		///
 		/// ↑更新処理ここまで
@@ -130,6 +156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 			if (ImGui::BeginTabItem("World")) {
+				ImGui::DragFloat("Gravity", &gravity, 1.0f);
 				ImGui::EndTabItem();
 			}
 

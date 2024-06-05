@@ -39,6 +39,13 @@ Vec3 Vec3::CrossProduct(const Vec3& other) const {
 	return { y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x };
 }
 
+float Vec3::Distance(const Vec3& other) const {
+	const float distX = other.x - x;
+	const float distY = other.y - y;
+	const float distZ = other.z - z;
+	return Vec3(distX, distY, distZ).Length();
+}
+
 /// <summary>
 /// ノーマライズします
 /// </summary>

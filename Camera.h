@@ -16,5 +16,5 @@ public:
 	float GetZoom() const;
 
 private:
-	float zoom_ = 1.0f;
+	float zoom_ = 0.25f;
 };
