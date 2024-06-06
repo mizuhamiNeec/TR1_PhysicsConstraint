@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 ./idea/
 /.idea/.idea.TR1_PhysicsConstraint/.idea
+/imgui.ini

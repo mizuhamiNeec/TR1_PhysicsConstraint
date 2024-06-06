@@ -53,6 +53,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::vector<std::shared_ptr<Object>> objects;
 	std::vector<std::shared_ptr<Circle>> circles;
 
+
+	// // グリッド配置
 	//const int x = 8; // x方向のCircleの数
 	//const int y = 8; // y方向のCircleの数
 	//const float spacing = 50.0f; // Circle間のスペース
@@ -73,7 +75,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	}
 	//}
 
-	const int numChildren = 5;
+	constexpr int numChildren = 5;
 	auto circleRoot = std::make_shared<Circle>("CircleRoot");
 	circleRoot->SetTransform(
 		{
