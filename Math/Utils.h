@@ -12,4 +12,4 @@ float Lerp(const float& start, const float& end, const float& t);
 
 constexpr float deg2Rad = static_cast<float>(std::numbers::pi_v<float> / 180.0f);
 
-void DrawArrow(const Vec3 start, const Vec3 end, const unsigned int color);
+void DrawLine(const Vec3 start, const Vec3 end, const unsigned int color);

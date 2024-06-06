@@ -38,13 +38,21 @@ Vec3 Camera::WorldToScreen(Vec3 world) const {
 	return positionOnScr;
 }
 
+Vec3 Camera::ScreenToWorld(const Vec3& screen) const {
+	Vec3 world;
+	world.x = (screen.x - static_cast<float>(kClientWidth * 0.5f)) / zoom_ + transform_.position.x;
+	world.y = (static_cast<float>(kClientHeight * 0.5f) - screen.y) / zoom_ + transform_.position.y;
+	world.z = screen.z;
+	return world;
+}
+
 void Camera::Details() {
 	Object::Details();
 
 	ImGui::Begin("Details");
 
 	if (ImGui::CollapsingHeader("Camera Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::DragFloat("Zoom", &zoom_, 0.1f);
+		ImGui::DragFloat("Zoom", &zoom_, 0.1f, 0.1f, 10.0f);
 	}
 
 	ImGui::End();

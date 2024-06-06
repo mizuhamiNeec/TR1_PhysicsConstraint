@@ -12,6 +12,9 @@ Circle::Circle(const std::string& name, const std::string& tag, const bool activ
 
 void Circle::Initialize(const std::string& name) {
 	Object::Initialize(name);
+	if (parent_) {
+		maxDistanceToParent_ = transform_.position.Distance(parent_->GetTransform().position);
+	}
 }
 
 void Circle::ResolveCollision(Circle& other) {

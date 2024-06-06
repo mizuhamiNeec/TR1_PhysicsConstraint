@@ -43,33 +43,67 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, kClientWidth, kClientHeight);
 
+	//Novice::SetWindowMode(kFullscreen);
+
 	// キー入力結果を受け取る箱
-	char keys[256] = { 0 };
-	char preKeys[256] = { 0 };
+	char keys[256] = {0};
+	char preKeys[256] = {0};
 
 	// ワールドにあるすべてのオブジェクトを格納します
 	std::vector<std::shared_ptr<Object>> objects;
 	std::vector<std::shared_ptr<Circle>> circles;
 
-	// オブジェクトを複数作成し、子オブジェクトも追加
-	int parentCounter = 1;
-	//int childCounter = 1;
-	int x = 24; // 親オブジェクトの数
-	int y = 24; // 子オブジェクトの数
+	//const int x = 8; // x方向のCircleの数
+	//const int y = 8; // y方向のCircleの数
+	//const float spacing = 50.0f; // Circle間のスペース
 
-	for (int i = 0; i < x; ++i) {
-		for (int j = 0; j < y; ++j) {
-			auto parentCircle = std::make_shared<Circle>("ParentCircle" + std::to_string(parentCounter++));
-			parentCircle->SetTransform({ {i * parentCircle->GetRadius() * 2.0f, j * parentCircle->GetRadius() * 2.0f, 0.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f} });
-			circles.push_back(parentCircle);
-			objects.push_back(parentCircle);
+	//for (int i = 0; i < x; ++i) {
+	//	for (int j = 0; j < y; ++j) {
+	//		auto circle = std::make_shared<Circle>("Circle_" + std::to_string(i) + "_" + std::to_string(j));
+	//		circle->SetTransform(
+	//			{
+	//				{spacing * i, spacing * j, 0.0f},
+	//				Vec3::zero,
+	//				Vec3::one
+	//			}
+	//		);
+	//		circle->Initialize(circle->GetName());
+	//		circles.push_back(circle);
+	//		objects.push_back(circle);
+	//	}
+	//}
 
-
-			/*auto childCircle = std::make_shared<Circle>("ChildCircle" + std::to_string(childCounter++));
-			childCircle->SetTransform({ {i * parentCircle->GetRadius() * 5.0f, (j + 1) * childCircle->GetRadius() * 2.25f, 0.0f},{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f} });
-			parentCircle->AddChild(childCircle);*/
+	const int numChildren = 5;
+	auto circleRoot = std::make_shared<Circle>("CircleRoot");
+	circleRoot->SetTransform(
+		{
+			Vec3::zero,
+			Vec3::zero,
+			Vec3::one
 		}
+	);
+	circles.push_back(circleRoot);
+	objects.push_back(circleRoot);
+
+	auto parent = circleRoot;
+	for (int i = 1; i <= numChildren; ++i) {
+		auto child = std::make_shared<Circle>("child" + std::to_string(i));
+		child->SetTransform(
+			{
+				{child->GetRadius() * 2.0f * i, 0.0f, 0.0f},
+				Vec3::zero,
+				Vec3::one
+			}
+		);
+		parent->AddChild(child);
+		child->Initialize(child->GetName());
+		circles.push_back(child);
+		parent = child;
 	}
+
+	auto otherCircle = std::make_shared<Circle>("OtherCircle");
+	circles.push_back(otherCircle);
+	objects.push_back(otherCircle);
 
 	// カメラを作成
 	auto camera = std::make_shared<Camera>();
@@ -86,6 +120,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 選択されたオブジェクトのポインタがここに格納される
 	std::shared_ptr<Object> selectedObject = nullptr;
+
+	bool lookAtObject = true;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -114,13 +150,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			o->Update();
 		}
 
-		Transform newCameraTransform = {
-			Vec3::Lerp(camera->GetTransform().position, selectedObject != nullptr ? selectedObject->GetTransform().position : Vec3::zero, 10.0f * deltaTime),
-			Vec3::zero,
-			Vec3::one
-		};
+		if (lookAtObject) {
+			Transform newCameraTransform = {
+				Vec3::Lerp(camera->GetTransform().position,
+						   selectedObject != nullptr ? selectedObject->GetTransform().position : Vec3::zero,
+						   10.0f * deltaTime),
+				Vec3::zero,
+				Vec3::one
+			};
 
-		camera->SetTransform(newCameraTransform);
+			camera->SetTransform(newCameraTransform);
+		}
 
 		///
 		/// ↑更新処理ここまで
@@ -157,6 +197,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			if (ImGui::BeginTabItem("World")) {
 				ImGui::DragFloat("Gravity", &gravity, 1.0f);
+				ImGui::Checkbox("Look at Object", &lookAtObject);
+				ImGui::Checkbox("DrawDebug", &bDrawDebug);
 				ImGui::EndTabItem();
 			}
 
